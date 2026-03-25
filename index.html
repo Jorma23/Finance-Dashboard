@@ -1,282 +1,53 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Stock Quest 🚀 Learn Stocks & Money Fun!</title>
-    <script src="[https://cdn.tailwindcss.com"></script]https://cdn.tailwindcss.com"></script>
-    <script src="https://unpkg.com/lightweight-charts/dist/lightweight-charts.standalone.production.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
-    <style>
-        body { font-family: 'Comic Sans MS', system-ui, sans-serif; }
-        .hero { background: linear-gradient(rgba(0,0,0,0.4), rgba(0,0,0,0.6)), url('https://images.unsplash.com/photo-1611976600899-0d4d9d0c3f0a') center/cover; }
-        .badge { background: linear-gradient(90deg, #22c55e, #eab308); }
-    </style>
+  <meta charset="UTF-8">
+  <title>My First Chart - Kids Themes + Stocks</title>
+  <style>
+    body { font-family: Arial, sans-serif; text-align: center; margin: 20px; background: #f9f9f9; }
+    h1 { color: #ff69b4; }
+    #chart { width: 100%; max-width: 800px; height: 500px; margin: 20px auto; border: 1px solid #ddd; }
+  </style>
 </head>
-<body class="bg-gradient-to-br from-purple-600 via-blue-600 to-emerald-600 text-white min-h-screen">
+<body>
+  <h1>Welcome to Little Learners Club!</h1>
+  <p>Free preschool/daycare website themes + fun stock chart demo</p>
 
-    <!-- NAV -->
-    <nav class="bg-black/30 backdrop-blur-md sticky top-0 z-50 py-4">
-        <div class="max-w-6xl mx-auto px-6 flex items-center justify-between">
-            <div class="flex items-center gap-3 text-3xl font-bold">🚀 Stock Quest</div>
-            <div class="flex gap-6 text-lg">
-                <a onclick="document.getElementById('chart-area').scrollIntoView({behavior:'smooth'})" class="hover:underline cursor-pointer">Chart Adventure</a>
-                <a onclick="document.getElementById('treasure').scrollIntoView({behavior:'smooth'})" class="hover:underline cursor-pointer">My Treasure Chest</a>
-                <a onclick="document.getElementById('world-money').scrollIntoView({behavior:'smooth'})" class="hover:underline cursor-pointer">Money Around World</a>
-            </div>
-        </div>
-    </nav>
+  <h2>Simple Stock Price Chart (AAPL Example)</h2>
+  <div id="chart"></div>
 
-    <!-- HERO -->
-    <header class="hero h-screen flex items-center justify-center text-center px-6">
-        <div class="max-w-2xl">
-            <h1 class="text-7xl font-black tracking-tighter mb-4 drop-shadow-lg">Stock Quest! 🚀</h1>
-            <p class="text-3xl mb-8">Level up your money skills with real stocks & super fun charts!</p>
-            <p class="text-xl mb-10">Perfect for kids & teens who want to become money masters 💰</p>
-            <button onclick="document.getElementById('chart-area').scrollIntoView({behavior:'smooth'})"
-                    class="bg-yellow-400 hover:bg-yellow-300 text-black font-bold text-2xl px-12 py-6 rounded-3xl shadow-xl transform hover:scale-105 transition">
-                Start the Adventure! 🎮
-            </button>
-        </div>
-    </header>
+  <!-- Load the free chart library from CDN -->
+  <script src="https://unpkg.com/lightweight-charts@5.0.0/dist/lightweight-charts.standalone.production.js"></script>
 
-    <!-- CHART ADVENTURE -->
-    <section id="chart-area" class="max-w-6xl mx-auto px-6 py-16">
-        <div class="text-center mb-12">
-            <h2 class="text-5xl font-bold mb-3">📊 Chart Adventure</h2>
-            <p class="text-2xl">Watch how stocks move! Try AAPL, TSLA, or your favorite company</p>
-        </div>
+  <script>
+    // Create the chart
+    const chart = LightweightCharts.createChart(document.getElementById('chart'), {
+      width: 800,
+      height: 500,
+    });
 
-        <div class="bg-white/10 backdrop-blur-lg rounded-3xl p-8">
-            <div class="flex gap-4 mb-6 justify-center">
-                <input id="symbol" value="AAPL" class="bg-white/20 rounded-2xl px-8 py-4 text-2xl text-center w-48 focus:outline-none focus:ring-4 focus:ring-yellow-300">
-                <button onclick="loadFunChart()"
-                        class="bg-yellow-400 hover:bg-yellow-300 text-black font-bold px-10 py-4 rounded-2xl text-xl">Go Explore! 🔎</button>
-            </div>
+    // Add a line series (you can change to candlestick later)
+    const lineSeries = chart.addLineSeries();
 
-            <div id="chart" class="w-full rounded-3xl overflow-hidden" style="height: 480px;"></div>
+    // Sample stock data (Apple prices)
+    lineSeries.setData([
+      { time: '2025-01-01', value: 150 },
+      { time: '2025-01-02', value: 152 },
+      { time: '2025-01-03', value: 148 },
+      { time: '2025-01-06', value: 155 },
+      { time: '2025-01-07', value: 158 },
+      { time: '2025-01-08', value: 160 },
+      { time: '2025-01-09', value: 162 },
+      { time: '2025-01-10', value: 159 },
+    ]);
 
-            <div class="grid grid-cols-3 gap-6 mt-8 text-center">
-                <div class="bg-white/10 rounded-3xl p-6">
-                    <div class="text-4xl mb-2">📈 RSI Power</div>
-                    <div id="rsi" class="text-5xl font-bold text-emerald-300">--</div>
-                    <p class="text-sm mt-1">Above 70 = super strong!</p>
-                </div>
-                <div class="bg-white/10 rounded-3xl p-6">
-                    <div class="text-4xl mb-2">⚡ MACD Boost</div>
-                    <div id="macd" class="text-5xl font-bold text-amber-300">--</div>
-                    <p class="text-sm mt-1">When line goes up = buy signal?</p>
-                </div>
-                <div class="bg-white/10 rounded-3xl p-6">
-                    <div class="text-4xl mb-2">🌊 VWAP Wave</div>
-                    <div id="vwap" class="text-5xl font-bold text-sky-300">--</div>
-                    <p class="text-sm mt-1">Average price wave</p>
-                </div>
-            </div>
-        </div>
-    </section>
+    // Auto-fit the chart
+    chart.timeScale().fitContent();
+  </script>
 
-    <!-- TREASURE CHEST PORTFOLIO -->
-    <section id="treasure" class="max-w-6xl mx-auto px-6 py-16 bg-white/10">
-        <div class="text-center mb-12">
-            <h2 class="text-5xl font-bold mb-3">🪙 My Treasure Chest</h2>
-            <p class="text-2xl">Build your dream portfolio and watch it grow!</p>
-        </div>
-
-        <div class="grid md:grid-cols-2 gap-10">
-            <!-- Add form -->
-            <div class="bg-white/20 rounded-3xl p-10">
-                <h3 class="text-3xl font-bold mb-6">Add a Stock to Your Chest</h3>
-                <input id="addSym" placeholder="Ticker like TSLA" class="w-full bg-white/30 rounded-2xl px-6 py-5 text-xl mb-4 placeholder:text-white/70">
-                <div class="grid grid-cols-2 gap-4">
-                    <input id="addShares" type="number" placeholder="How many shares?" class="bg-white/30 rounded-2xl px-6 py-5 text-xl">
-                    <input id="addBuy" type="number" placeholder="Buy price $" class="bg-white/30 rounded-2xl px-6 py-5 text-xl">
-                </div>
-                <button onclick="addToTreasure()"
-                        class="mt-8 w-full bg-emerald-400 hover:bg-emerald-300 text-black font-bold py-6 rounded-3xl text-2xl">Add to Chest! 🎉</button>
-            </div>
-
-            <!-- Table + total -->
-            <div>
-                <table id="treasureTable" class="w-full text-left bg-white/10 rounded-3xl overflow-hidden">
-                    <thead class="bg-white/20">
-                        <tr><th class="py-6 px-8">Stock</th><th class="py-6 px-8">Shares</th><th class="py-6 px-8">Buy $</th><th class="py-6 px-8">Value</th><th class="py-6 px-8">Gain</th><th></th></tr>
-                    </thead>
-                    <tbody class="divide-y divide-white/20"></tbody>
-                </table>
-                <div class="mt-8 text-center">
-                    <div class="text-4xl font-bold">Total Treasure: <span id="totalTreasure" class="text-yellow-300">$0</span></div>
-                    <canvas id="pieChart" class="mx-auto mt-6" width="220" height="220"></canvas>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- MONEY AROUND THE WORLD + TIPS -->
-    <section id="world-money" class="max-w-6xl mx-auto px-6 py-16">
-        <div class="grid md:grid-cols-2 gap-12">
-            <!-- Currency -->
-            <div class="bg-white/10 rounded-3xl p-10">
-                <h2 class="text-4xl font-bold mb-8">🌍 Money Around the World</h2>
-                <select id="baseCur" class="bg-white/30 rounded-2xl px-6 py-4 text-xl w-full mb-6">
-                    <option value="USD">US Dollar 🇺🇸</option>
-                    <option value="EUR">Euro 🇪🇺</option>
-                    <option value="GBP">British Pound 🇬🇧</option>
-                </select>
-                <button onclick="convertWorldMoney()" class="w-full py-6 bg-yellow-400 text-black font-bold rounded-3xl text-2xl">Convert Now!</button>
-                <div id="worldResult" class="mt-10 text-3xl font-bold text-center min-h-[80px]"></div>
-            </div>
-
-            <!-- Fun Tips -->
-            <div>
-                <h2 class="text-4xl font-bold mb-8">💡 Quick Money Tips for Legends</h2>
-                <div class="space-y-6">
-                    <div class="bg-white/10 rounded-3xl p-6">💰 Start small — even $10 can grow with compound interest magic!</div>
-                    <div class="bg-white/10 rounded-3xl p-6">📈 Diversify = don't put all eggs in one basket (buy different stocks)</div>
-                    <div class="bg-white/10 rounded-3xl p-6">🧠 Long term > get rich quick. Patience wins the game!</div>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <footer class="text-center py-12 bg-black/30 text-white/70">
-        Made for learning fun • Stock Quest is for education only — real investing needs grown-up help!
-    </footer>
-
-    <script>
-        // Tailwind quick setup
-        tailwind.config = { content: ["*"] };
-
-        const ALPHA_KEY = 'YOUR_ALPHA_VANTAGE_KEY_HERE'; // ← Put your key here
-
-        let chart, candleSeries;
-        let treasure = JSON.parse(localStorage.getItem('stockQuestTreasure')) || [];
-        let priceCache = {};
-
-        function initChart() {
-            const container = document.getElementById('chart');
-            chart = LightweightCharts.createChart(container, {
-                width: container.clientWidth,
-                height: 480,
-                layout: { background: { color: '#1e2937' }, textColor: '#e0f2fe' },
-                grid: { vertLines: { color: '#334155' }, horzLines: { color: '#334155' } }
-            });
-            candleSeries = chart.addCandlestickSeries();
-            window.addEventListener('resize', () => chart.applyOptions({width: container.clientWidth}));
-        }
-
-        async function loadFunChart() {
-            const sym = (document.getElementById('symbol').value || 'AAPL').toUpperCase();
-            if (!ALPHA_KEY || ALPHA_KEY.includes('YOUR_')) {
-                alert("Hey! Add your free Alpha Vantage key in the code first (it's easy!)");
-                return;
-            }
-
-            try {
-                const res = await fetch(`https://www.alphavantage.co/query?function=TIME_SERIES_DAILY_ADJUSTED&symbol=${sym}&outputsize=compact&apikey=${ALPHA_KEY}`);
-                const json = await res.json();
-                const ts = json['Time Series (Daily)'];
-                const data = Object.keys(ts).map(k => ({
-                    time: k,
-                    open: parseFloat(ts[k]['1. open']),
-                    high: parseFloat(ts[k]['2. high']),
-                    low: parseFloat(ts[k]['3. low']),
-                    close: parseFloat(ts[k]['4. close'])
-                })).reverse();
-
-                candleSeries.setData(data);
-                chart.timeScale().fitContent();
-
-                const latest = data[data.length-1];
-                document.getElementById('rsi').textContent = (50 + Math.random()*40).toFixed(0); // fun approx
-                document.getElementById('macd').textContent = (latest.close * 0.002).toFixed(2);
-                document.getElementById('vwap').textContent = '$' + (latest.close * 0.995).toFixed(2);
-
-                priceCache[sym] = latest.close;
-                renderTreasure();
-            } catch(e) {
-                alert("Oops! Try again or check your API key");
-            }
-        }
-
-        function renderTreasure() {
-            const tbody = document.querySelector('#treasureTable tbody');
-            tbody.innerHTML = '';
-            let total = 0;
-
-            treasure.forEach((item, i) => {
-                const current = priceCache[item.symbol] || item.buyPrice;
-                const value = item.shares * current;
-                const gain = ((current - item.buyPrice) / item.buyPrice * 100).toFixed(1);
-                total += value;
-
-                const row = document.createElement('tr');
-                row.className = 'border-b border-white/20';
-                row.innerHTML = `
-                    <td class="py-6 px-8 font-bold">${item.symbol} 🚀</td>
-                    <td class="py-6 px-8">${item.shares}</td>
-                    <td class="py-6 px-8">$${item.buyPrice}</td>
-                    <td class="py-6 px-8">$${value.toFixed(0)}</td>
-                    <td class="py-6 px-8 ${gain > 0 ? 'text-emerald-300' : 'text-red-300'}">${gain}%</td>
-                    <td class="py-6 px-8"><button onclick="removeFromTreasure(${i})" class="text-red-300">✕</button></td>
-                `;
-                tbody.appendChild(row);
-            });
-
-            document.getElementById('totalTreasure').textContent = '$' + total.toFixed(0);
-            renderPie();
-        }
-
-        function renderPie() {
-            const ctx = document.getElementById('pieChart');
-            if (window.pie) window.pie.destroy();
-            const labels = treasure.map(t => t.symbol);
-            const values = treasure.map(t => t.shares * (priceCache[t.symbol] || t.buyPrice));
-            window.pie = new Chart(ctx, {
-                type: 'doughnut',
-                data: { labels, datasets: [{ data: values, backgroundColor: ['#22c55e','#eab308','#06b67f','#3b82f6'] }] },
-                options: { cutout: '65%', plugins: { legend: { position: 'bottom', labels: { color: '#fff', font: { size: 14 } } } } }
-            });
-        }
-
-        function addToTreasure() {
-            const symbol = document.getElementById('addSym').value.toUpperCase().trim();
-            const shares = parseFloat(document.getElementById('addShares').value);
-            const buyPrice = parseFloat(document.getElementById('addBuy').value);
-            if (!symbol || !shares || !buyPrice) return alert("Fill everything in!");
-
-            treasure.push({symbol, shares, buyPrice});
-            localStorage.setItem('stockQuestTreasure', JSON.stringify(treasure));
-            renderTreasure();
-        }
-
-        function removeFromTreasure(i) {
-            treasure.splice(i, 1);
-            localStorage.setItem('stockQuestTreasure', JSON.stringify(treasure));
-            renderTreasure();
-        }
-
-        async function convertWorldMoney() {
-            const base = document.getElementById('baseCur').value;
-            try {
-                const r = await fetch(`https://open.er-api.com/v6/latest/${base}`);
-                const j = await r.json();
-                document.getElementById('worldResult').innerHTML = `1 ${base} = ${j.rates.USD.toFixed(2)} USD 💵`;
-            } catch(e) {
-                document.getElementById('worldResult').textContent = "Whoops, try again!";
-            }
-        }
-
-        // Start the quest!
-        window.onload = () => {
-            initChart();
-            renderTreasure();
-            // Demo load
-            setTimeout(() => {
-                document.getElementById('symbol').value = 'AAPL';
-                loadFunChart();
-            }, 600);
-        };
-    </script>
+  <p>Scroll down or zoom on the chart. We'll make it prettier soon!</p>
 </body>
-</html>​
+</html>
+         
+
+      
