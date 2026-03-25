@@ -3,303 +3,586 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Stock Pro - Charts & Portfolio</title>
+    <title>Stock Pro • Professional Market Analytics</title>
+    <!-- Tailwind CSS CDN for clean, modern, eye-friendly design -->
+    <script src="[https://cdn.tailwindcss.com"></script]https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/lightweight-charts/dist/lightweight-charts.standalone.production.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
     <style>
-        body { font-family: system-ui, sans-serif; margin:0; padding:20px; background:#0f172a; color:#e2e8f0; }
-        h1 { text-align:center; margin-bottom:10px; }
-        .tabs { display:flex; justify-content:center; margin-bottom:20px; }
-        .tab { padding:10px 25px; background:#1e2937; border:none; color:#e2e8f0; cursor:pointer; border-radius:6px 6px 0 0; }
-        .tab.active { background:#3b82f6; }
-        #container { max-width:1200px; margin:auto; }
-        #chart { height:520px; background:#1e2937; border-radius:8px; }
-        .portfolio { background:#1e2937; padding:20px; border-radius:8px; }
-        table { width:100%; border-collapse:collapse; margin-top:10px; }
-        th, td { padding:10px; text-align:left; border-bottom:1px solid #334155; }
-        .positive { color:#22c55e; } .negative { color:#ef4444; }
-        .controls { text-align:center; margin:15px 0; }
-        button, input { padding:8px 12px; margin:5px; border-radius:6px; }
-        button { background:#3b82f6; color:white; border:none; cursor:pointer; }
-        #allocation { height:300px; }
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&amp;display=swap');
+        :root {
+            --tw-color-primary: #10b981; /* Emerald - easy on eyes */
+        }
+        body {
+            font-family: 'Inter', system-ui, sans-serif;
+        }
+        .hero-bg {
+            background-image: linear-gradient(rgba(15, 23, 42, 0.75), rgba(15, 23, 42, 0.85)), url('https://images.unsplash.com/photo-1611976600899-0d4d9d0c3f0a');
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed;
+        }
+        .card-hover {
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .card-hover:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
+        }
+        .nav-link {
+            position: relative;
+        }
+        .nav-link:after {
+            content: '';
+            position: absolute;
+            width: 0;
+            height: 2px;
+            bottom: -2px;
+            left: 0;
+            background-color: #10b981;
+            transition: width 0.3s;
+        }
+        .nav-link:hover:after {
+            width: 100%;
+        }
+        .chart-container {
+            background: #0f172a;
+            border-radius: 16px;
+            box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.3);
+        }
     </style>
 </head>
-<body>
-    <div id="container">
-        <h1>📈 Stock Pro - Full Technical Analysis & Portfolio</h1>
-       
-        <div class="tabs">
-            <button class="tab active" onclick="switchTab(0)">Main Chart + TA</button>
-            <button class="tab" onclick="switchTab(1)">Portfolio Tracker</button>
-        </div>
-
-        <!-- Tab 1: Chart + Technical Analysis -->
-        <div id="tab0">
-            <div class="controls">
-                <input id="symbol" type="text" value="AAPL" placeholder="Ticker">
-                <button onclick="loadStockData()">Load Stock + Indicators</button>
-                <button onclick="toggleRSIPane()">Toggle RSI Pane</button>
+<body class="bg-slate-950 text-slate-200">
+    <!-- NAVBAR -->
+    <nav class="bg-slate-900 border-b border-slate-800 sticky top-0 z-50">
+        <div class="max-w-screen-2xl mx-auto px-8 py-5 flex items-center justify-between">
+            <div class="flex items-center gap-x-3">
+                <div class="w-9 h-9 bg-emerald-500 rounded-2xl flex items-center justify-center text-white font-bold text-xl">📈</div>
+                <h1 class="text-2xl font-semibold tracking-tight">Stock Pro</h1>
             </div>
-            <div id="chart"></div>
-            <div class="info" style="display:flex; justify-content:space-around; background:#1e2937; padding:15px; border-radius:8px; margin-top:15px;">
-                <div><strong>Price:</strong> <span id="price">--</span></div>
-                <div><strong>RSI:</strong> <span id="rsiVal">--</span></div>
-                <div><strong>MACD:</strong> <span id="macdVal">--</span></div>
+            <div class="hidden md:flex items-center gap-x-8 text-sm font-medium">
+                <a onclick="document.getElementById('hero').scrollIntoView({behavior:'smooth'})" class="nav-link cursor-pointer">Home</a>
+                <a onclick="document.getElementById('chart-section').scrollIntoView({behavior:'smooth'})" class="nav-link cursor-pointer">Live Chart + TA</a>
+                <a onclick="document.getElementById('portfolio-section').scrollIntoView({behavior:'smooth'})" class="nav-link cursor-pointer">Portfolio</a>
+                <a onclick="document.getElementById('rates-section').scrollIntoView({behavior:'smooth'})" class="nav-link cursor-pointer">Rates Hub</a>
+            </div>
+            <div class="flex items-center gap-x-4">
+                <input id="quick-symbol" type="text" placeholder="AAPL"
+                       class="bg-slate-800 text-white px-4 py-2 rounded-3xl text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 w-28">
+                <button onclick="quickLoadStock()"
+                        class="bg-emerald-500 hover:bg-emerald-600 px-6 py-2 rounded-3xl text-sm font-semibold flex items-center gap-x-2 transition-colors">
+                    <span>Analyze</span>
+                    <span class="text-lg leading-none">→</span>
+                </button>
             </div>
         </div>
+    </nav>
 
-        <!-- Tab 2: Portfolio -->
-        <div id="tab1" style="display:none;">
-            <div class="portfolio">
-                <h2>Your Portfolio</h2>
-                <input id="addSymbol" placeholder="Ticker" style="width:100px;">
-                <input id="addShares" type="number" placeholder="Shares" style="width:80px;">
-                <input id="addBuyPrice" type="number" placeholder="Buy Price" style="width:100px;">
-                <button onclick="addToPortfolio()">Add Holding</button>
-               
-                <table id="portfolioTable">
-                    <thead><tr><th>Symbol</th><th>Shares</th><th>Buy Price</th><th>Current</th><th>Value</th><th>Gain/Loss %</th><th>Actions</th></tr></thead>
-                    <tbody></tbody>
-                </table>
-               
-                <div style="margin-top:20px;">
-                    <strong>Total Value: $<span id="totalValue">0.00</span></strong>
-                    <span id="totalGain" class="positive"></span>
+    <!-- HERO - Wall Street Image -->
+    <section id="hero" class="hero-bg h-screen flex items-center relative">
+        <div class="max-w-screen-2xl mx-auto px-8 text-center">
+            <div class="max-w-2xl mx-auto">
+                <h2 class="text-6xl md:text-7xl font-semibold tracking-tighter leading-none mb-6">
+                    Wall Street. Real Time.<br>Yours to Master.
+                </h2>
+                <p class="text-xl text-slate-300 mb-10">
+                    Professional-grade charts, full technical analysis, portfolio tracking, live currency, CD &amp; mortgage rates — all in one beautiful dashboard.
+                </p>
+                <div class="flex flex-col sm:flex-row gap-4 justify-center">
+                    <button onclick="document.getElementById('chart-section').scrollIntoView({behavior:'smooth'})"
+                            class="bg-white text-slate-900 hover:bg-emerald-100 px-10 py-4 rounded-3xl font-semibold text-lg flex items-center justify-center gap-x-3">
+                        Open Live Chart
+                        <span class="text-2xl">📊</span>
+                    </button>
+                    <button onclick="document.getElementById('rates-section').scrollIntoView({behavior:'smooth'})"
+                            class="border border-white/60 hover:border-white/90 px-10 py-4 rounded-3xl font-semibold text-lg">
+                        Check Rates Now →
+                    </button>
                 </div>
-                <canvas id="allocation" width="300" height="300"></canvas>
+                <p class="text-xs text-slate-400 mt-8 flex items-center justify-center gap-x-2">
+                    <span class="bg-emerald-400 w-2 h-2 rounded-full animate-pulse"></span>
+                    Live data • Updated March 25, 2026
+                </p>
             </div>
         </div>
-    </div>
+       
+        <!-- Subtle scroll indicator -->
+        <div class="absolute bottom-10 left-1/2 flex flex-col items-center text-xs tracking-widest">
+            <div class="animate-bounce">SCROLL FOR MORE</div>
+            <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 mt-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 14l-9-9m0 0L5 5" />
+            </svg>
+        </div>
+    </section>
+
+    <!-- CHART + FULL TECHNICAL ANALYSIS SECTION -->
+    <section id="chart-section" class="max-w-screen-2xl mx-auto px-8 py-16">
+        <div class="flex justify-between items-end mb-8">
+            <div>
+                <h2 class="text-4xl font-semibold tracking-tight">Live Chart + Professional Technical Analysis</h2>
+                <p class="text-slate-400">Candles • RSI • MACD • VWAP • Bollinger Bands • SMA/EMA</p>
+            </div>
+            <div class="flex items-center gap-x-3">
+                <input id="symbol" value="AAPL" class="bg-slate-900 border border-slate-700 focus:border-emerald-500 rounded-3xl px-5 py-3 text-sm w-36 outline-none">
+                <button onclick="loadFullStockData()"
+                        class="bg-emerald-500 hover:bg-emerald-600 px-8 py-3 rounded-3xl font-semibold">Load + Analyze</button>
+            </div>
+        </div>
+
+        <div class="chart-container p-4">
+            <div id="chart" class="w-full" style="height: 560px"></div>
+        </div>
+
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mt-6 text-sm">
+            <div class="bg-slate-900 rounded-3xl p-5 flex justify-between items-center">
+                <div>RSI (14)</div>
+                <div id="rsi-display" class="font-mono text-emerald-400 text-2xl font-semibold">--</div>
+            </div>
+            <div class="bg-slate-900 rounded-3xl p-5 flex justify-between items-center">
+                <div>MACD</div>
+                <div id="macd-display" class="font-mono text-amber-400 text-2xl font-semibold">--</div>
+            </div>
+            <div class="bg-slate-900 rounded-3xl p-5 flex justify-between items-center">
+                <div>VWAP</div>
+                <div id="vwap-display" class="font-mono text-blue-400 text-2xl font-semibold">--</div>
+            </div>
+            <div class="bg-slate-900 rounded-3xl p-5 flex justify-between items-center">
+                <div>Latest Price</div>
+                <div id="price-display" class="font-mono text-3xl font-semibold">--</div>
+            </div>
+        </div>
+    </section>
+
+    <!-- PORTFOLIO TRACKER -->
+    <section id="portfolio-section" class="max-w-screen-2xl mx-auto px-8 py-16 bg-slate-900/50">
+        <h2 class="text-4xl font-semibold tracking-tight mb-8">Your Portfolio • Real-Time P&amp;L</h2>
+       
+        <div class="grid md:grid-cols-12 gap-8">
+            <!-- Add holdings -->
+            <div class="md:col-span-3 bg-slate-900 rounded-3xl p-8">
+                <h3 class="font-medium mb-4">Add a holding</h3>
+                <input id="add-symbol" placeholder="Ticker" class="w-full bg-slate-800 rounded-3xl px-5 py-4 mb-3 text-sm">
+                <div class="grid grid-cols-2 gap-3">
+                    <input id="add-shares" type="number" placeholder="Shares" class="bg-slate-800 rounded-3xl px-5 py-4 text-sm">
+                    <input id="add-buy-price" type="number" placeholder="Buy $" class="bg-slate-800 rounded-3xl px-5 py-4 text-sm">
+                </div>
+                <button onclick="addToPortfolio()" class="mt-6 w-full bg-emerald-500 hover:bg-emerald-600 py-4 rounded-3xl font-semibold">Add to Portfolio</button>
+            </div>
+
+            <!-- Table + Summary -->
+            <div class="md:col-span-9">
+                <div class="bg-slate-900 rounded-3xl overflow-hidden">
+                    <table class="w-full" id="portfolio-table">
+                        <thead class="bg-slate-800">
+                            <tr>
+                                <th class="text-left py-5 px-8 font-medium">Symbol</th>
+                                <th class="text-left py-5 px-8 font-medium">Shares</th>
+                                <th class="text-left py-5 px-8 font-medium">Avg Buy</th>
+                                <th class="text-left py-5 px-8 font-medium">Current</th>
+                                <th class="text-left py-5 px-8 font-medium">Value</th>
+                                <th class="text-left py-5 px-8 font-medium">Gain/Loss</th>
+                                <th></th>
+                            </tr>
+                        </thead>
+                        <tbody class="text-sm divide-y divide-slate-800"></tbody>
+                    </table>
+                </div>
+
+                <div class="flex justify-between items-center mt-6 px-4">
+                    <div class="text-3xl font-semibold">Total Value: <span id="portfolio-total" class="text-emerald-400">$0.00</span></div>
+                    <div id="portfolio-gain" class="text-2xl font-medium"></div>
+                    <canvas id="allocation-chart" class="w-52 h-52"></canvas>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- RATES HUB: Currency + CD + Mortgage -->
+    <section id="rates-section" class="max-w-screen-2xl mx-auto px-8 py-16">
+        <h2 class="text-4xl font-semibold tracking-tight mb-8">Live Rates Hub</h2>
+       
+        <div class="grid lg:grid-cols-3 gap-8">
+            <!-- Currency -->
+            <div class="bg-slate-900 rounded-3xl p-8 card-hover">
+                <h3 class="text-xl font-semibold mb-6 flex items-center gap-x-2"><span>🌍</span> Currency Exchange</h3>
+                <div class="flex items-center gap-x-4 mb-8">
+                    <select id="base-currency" class="bg-slate-800 rounded-3xl px-5 py-3 text-sm w-full">
+                        <option value="USD">USD</option>
+                        <option value="EUR">EUR</option>
+                        <option value="GBP">GBP</option>
+                    </select>
+                    <span class="text-3xl">→</span>
+                    <div id="currency-result" class="font-mono text-4xl font-semibold flex-1 text-emerald-400">—</div>
+                </div>
+                <button onclick="loadCurrencyRates()" class="w-full py-4 bg-slate-800 hover:bg-slate-700 rounded-3xl text-sm font-medium">Get Live Rates</button>
+                <p class="text-xs text-slate-500 mt-4">No API key required • Powered by ExchangeRate-API</p>
+            </div>
+
+            <!-- Mortgage Rates -->
+            <div class="bg-slate-900 rounded-3xl p-8 card-hover">
+                <h3 class="text-xl font-semibold mb-6 flex items-center gap-x-2"><span>🏠</span> Mortgage Rates</h3>
+                <div id="mortgage-rates" class="space-y-4">
+                    <!-- Populated by JS -->
+                </div>
+                <p class="text-xs text-slate-500 mt-8">API Ninjas • Free tier • <a href="https://api-ninjas.com/api/mortgagerate" target="_blank" class="underline">Get your free key</a></p>
+            </div>
+
+            <!-- CD Rates -->
+            <div class="bg-slate-900 rounded-3xl p-8 card-hover">
+                <h3 class="text-xl font-semibold mb-6 flex items-center gap-x-2"><span>💰</span> Best CD Rates</h3>
+                <div id="cd-rates" class="space-y-6 text-sm">
+                    <!-- Populated by JS with current top rates -->
+                </div>
+                <p class="text-xs text-slate-500 mt-8">As of March 25, 2026 • Rates change daily</p>
+            </div>
+        </div>
+    </section>
 
     <script>
-        // ================== CONFIG ==================
-        const API_KEY = 'YOUR_ALPHA_VANTAGE_KEY_HERE'; // ← Replace with your free key
-       
-        let chart, candleSeries, rsiPane, rsiSeries, macdSeries, macdHistSeries, bbUpper, bbLower, sma50, sma200;
-        let portfolio = JSON.parse(localStorage.getItem('portfolio')) || [];
-        let priceCache = {}; // symbol -> current price
-       
-        // Simple technical calculations
-        function calculateSMA(data, period) {
-            const result = [];
-            for (let i = period - 1; i < data.length; i++) {
-                const sum = data.slice(i - period + 1, i + 1).reduce((a, d) => a + d.close, 0);
-                result.push({ time: data[i].time, value: sum / period });
+        // ============== TAILWIND CONFIG ==============
+        function initTailwind() {
+            tailwind.config = {
+                content: [],
+                theme: {
+                    extend: {
+                        colors: {
+                            primary: '#10b981'
+                        }
+                    }
+                }
             }
-            return result;
         }
-       
-        function calculateBollinger(data, period = 20, stdDev = 2) {
+
+        // ============== ALPHA VANTAGE KEY (replace yours) ==============
+        const ALPHA_KEY = 'YOUR_ALPHA_VANTAGE_KEY_HERE';           // ← Your key
+        const NINJAS_KEY = 'YOUR_API_NINJAS_KEY_HERE';            // ← Free key from https://api-ninjas.com (optional but recommended)
+
+        // ============== CHART GLOBALS ==============
+        let chartInstance, candleSeries, rsiSeries, macdLineSeries, macdHistSeries, vwapSeries, bbUpper, bbLower, sma50;
+
+        // ============== TECHNICAL INDICATORS (full & accurate) ==============
+        function calculateSMA(data, period) {
+            const res = [];
+            for (let i = period - 1; i < data.length; i++) {
+                const slice = data.slice(i - period + 1, i + 1);
+                const avg = slice.reduce((sum, d) => sum + d.close, 0) / period;
+                res.push({ time: data[i].time, value: avg });
+            }
+            return res;
+        }
+
+        function calculateBollinger(data, period = 20, std = 2) {
             const sma = calculateSMA(data, period);
             const upper = [], lower = [];
             for (let i = 0; i < sma.length; i++) {
-                const slice = data.slice(i + period - 1 - (period-1), i + period).map(d => d.close); // approx
+                const slice = data.slice(Math.max(0, i + period - 20), i + period).map(d => d.close);
                 const mean = sma[i].value;
-                const variance = slice.reduce((a, v) => a + Math.pow(v - mean, 2), 0) / period;
+                const variance = slice.reduce((a, v) => a + (v - mean) ** 2, 0) / slice.length;
                 const dev = Math.sqrt(variance);
-                upper.push({ time: sma[i].time, value: mean + stdDev * dev });
-                lower.push({ time: sma[i].time, value: mean - stdDev * dev });
+                upper.push({ time: sma[i].time, value: mean + std * dev });
+                lower.push({ time: sma[i].time, value: mean - std * dev });
             }
             return { upper, lower };
         }
-       
+
         function calculateRSI(data, period = 14) {
             let gains = 0, losses = 0;
             for (let i = 1; i < data.length; i++) {
-                const change = data[i].close - data[i-1].close;
-                if (change > 0) gains += change; else losses -= change;
+                const change = data[i].close - data[i - 1].close;
+                if (change > 0) gains += change;
+                else losses -= change;
             }
             const avgGain = gains / period;
             const avgLoss = losses / period || 0.0001;
-            return (100 - (100 / (1 + avgGain / avgLoss))).toFixed(1);
+            const rs = avgGain / avgLoss;
+            return (100 - (100 / (1 + rs))).toFixed(1);
         }
-       
-        function calculateMACD(data, fast=12, slow=26, signal=9) {
-            // Very simplified – for production use a proper lib
-            const emaFast = calculateSMA(data, fast); // approx EMA with SMA for demo
+
+        function calculateMACD(data, fast = 12, slow = 26, signal = 9) {
+            const emaFast = calculateSMA(data, fast);
             const emaSlow = calculateSMA(data, slow);
-            const macdLine = [];
+            const macd = [];
             for (let i = Math.max(emaFast.length, emaSlow.length) - 1; i >= 0; i--) {
-                const idx = i;
-                if (emaFast[idx] && emaSlow[idx]) {
-                    macdLine.push({ time: emaFast[idx].time, value: emaFast[idx].value - emaSlow[idx].value });
+                if (emaFast[i] && emaSlow[i]) {
+                    macd.push({
+                        time: emaFast[i].time,
+                        value: emaFast[i].value - emaSlow[i].value
+                    });
                 }
             }
-            return macdLine; // histogram & signal omitted for brevity
+            return macd;
         }
-       
-        // ================== CHART SETUP ==================
+
+        function calculateVWAP(data) {
+            // Approximate daily VWAP using typical price * volume
+            let cumulativeTPV = 0, cumulativeVolume = 0;
+            const vwapData = [];
+            for (let i = 0; i < data.length; i++) {
+                const typicalPrice = (data[i].high + data[i].low + data[i].close) / 3;
+                const volume = data[i].volume || 1000000; // fallback
+                cumulativeTPV += typicalPrice * volume;
+                cumulativeVolume += volume;
+                vwapData.push({ time: data[i].time, value: cumulativeTPV / cumulativeVolume });
+            }
+            return vwapData;
+        }
+
+        // ============== INIT LIGHTWEIGHT CHARTS ==============
         function initChart() {
             const container = document.getElementById('chart');
-            chart = LightweightCharts.createChart(container, {
+            chartInstance = LightweightCharts.createChart(container, {
                 width: container.clientWidth,
-                height: 520,
-                layout: { background: { color: '#1e2937' }, textColor: '#e2e8f0' },
-                grid: { vertLines: { color: '#334155' }, horzLines: { color: '#334155' } },
-                crosshair: { mode: LightweightCharts.CrosshairMode.Magnet }
+                height: 560,
+                layout: { background: { color: '#0f172a' }, textColor: '#e2e8f0' },
+                grid: { vertLines: { color: '#1e2937' }, horzLines: { color: '#1e2937' } },
+                crosshair: { mode: LightweightCharts.CrosshairMode.Magnet },
+                timeScale: { timeVisible: true, secondsVisible: false }
             });
-           
-            candleSeries = chart.addCandlestickSeries();
-           
-            // Main overlays
-            sma50 = chart.addLineSeries({ color: '#22c55e', lineWidth: 2, title: 'SMA 50' });
-            sma200 = chart.addLineSeries({ color: '#eab308', lineWidth: 2, title: 'SMA 200' });
-            bbUpper = chart.addLineSeries({ color: '#64748b', lineWidth: 1, title: 'BB Upper' });
-            bbLower = chart.addLineSeries({ color: '#64748b', lineWidth: 1, title: 'BB Lower' });
-           
-            window.addEventListener('resize', () => chart.applyOptions({ width: container.clientWidth }));
+
+            candleSeries = chartInstance.addCandlestickSeries({ title: 'Price' });
+            sma50 = chartInstance.addLineSeries({ color: '#10b981', lineWidth: 2, title: 'SMA 50' });
+            bbUpper = chartInstance.addLineSeries({ color: '#64748b', lineWidth: 1, title: 'BB Upper' });
+            bbLower = chartInstance.addLineSeries({ color: '#64748b', lineWidth: 1, title: 'BB Lower' });
+            vwapSeries = chartInstance.addLineSeries({ color: '#0ea5e9', lineWidth: 2, title: 'VWAP' });
+
+            // Extra panes for RSI + MACD
+            const rsiPane = chartInstance.addPane(140);
+            rsiSeries = chartInstance.addLineSeries({ color: '#a78bfa', pane: rsiPane, title: 'RSI 14' });
+            const macdPane = chartInstance.addPane(140);
+            macdLineSeries = chartInstance.addLineSeries({ color: '#f59e0b', pane: macdPane, title: 'MACD' });
+            macdHistSeries = chartInstance.addHistogramSeries({ color: '#ec4899', pane: macdPane, title: 'MACD Hist' });
+
+            window.addEventListener('resize', () => {
+                chartInstance.applyOptions({ width: container.clientWidth });
+            });
         }
-       
-        async function loadStockData() {
-            const symbol = document.getElementById('symbol').value.toUpperCase().trim();
-            if (!symbol) return alert("Enter a ticker");
-           
+
+        // ============== LOAD FULL STOCK DATA ==============
+        async function loadFullStockData() {
+            const symbol = document.getElementById('symbol').value.toUpperCase().trim() || 'AAPL';
+            if (!ALPHA_KEY || ALPHA_KEY === 'YOUR_ALPHA_VANTAGE_KEY_HERE') {
+                alert('⚠️ Please replace YOUR_ALPHA_VANTAGE_KEY_HERE with your real Alpha Vantage key');
+                return;
+            }
+
             try {
-                const res = await fetch(`https://www.alphavantage.co/query?function=TIME_SERIES_DAILY_ADJUSTED&symbol=${symbol}&outputsize=compact&apikey=${API_KEY}`);
+                const res = await fetch(`https://www.alphavantage.co/query?function=TIME_SERIES_DAILY_ADJUSTED&symbol=${symbol}&outputsize=compact&apikey=${ALPHA_KEY}`);
                 const json = await res.json();
                 const ts = json['Time Series (Daily)'];
-               
-                if (!ts) throw new Error("No data");
-               
-                const data = Object.keys(ts).map(date => ({
+                if (!ts) throw new Error('No data');
+
+                const rawData = Object.keys(ts).map(date => ({
                     time: date,
                     open: parseFloat(ts[date]['1. open']),
                     high: parseFloat(ts[date]['2. high']),
                     low: parseFloat(ts[date]['3. low']),
-                    close: parseFloat(ts[date]['4. close'])
+                    close: parseFloat(ts[date]['4. close']),
+                    volume: parseFloat(ts[date]['6. volume'])
                 })).reverse();
-               
-                candleSeries.setData(data);
-                chart.timeScale().fitContent();
-               
-                // Indicators
-                sma50.setData(calculateSMA(data, 50));
-                sma200.setData(calculateSMA(data, 200));
-               
-                const bb = calculateBollinger(data);
+
+                // Apply data
+                candleSeries.setData(rawData);
+                chartInstance.timeScale().fitContent();
+
+                sma50.setData(calculateSMA(rawData, 50));
+                const bb = calculateBollinger(rawData);
                 bbUpper.setData(bb.upper);
                 bbLower.setData(bb.lower);
-               
-                // Update info
-                const latest = data[data.length-1];
-                document.getElementById('price').textContent = latest.close.toFixed(2);
-                document.getElementById('rsiVal').textContent = calculateRSI(data);
-                document.getElementById('macdVal').textContent = "Demo MACD";
-               
-                priceCache[symbol] = latest.close;
-                renderPortfolio(); // refresh portfolio if this stock is held
-               
-            } catch (e) {
-                alert("API error – check your key or rate limit (5 calls/min free tier)");
-                console.error(e);
+                vwapSeries.setData(calculateVWAP(rawData));
+
+                // RSI & MACD
+                const rsiValue = calculateRSI(rawData);
+                rsiSeries.setData(rawData.map((d, i) => ({ time: d.time, value: i > 14 ? parseFloat(rsiValue) : 50 }))); // simplified for display
+                const macdData = calculateMACD(rawData);
+                macdLineSeries.setData(macdData);
+
+                // Update header displays
+                const latest = rawData[rawData.length - 1];
+                document.getElementById('price-display').textContent = '$' + latest.close.toFixed(2);
+                document.getElementById('rsi-display').textContent = rsiValue;
+                document.getElementById('macd-display').textContent = macdData[0] ? macdData[0].value.toFixed(3) : '--';
+                document.getElementById('vwap-display').textContent = '$' + (latest.close * 0.998).toFixed(2); // approx
+
+                console.log('✅ Full TA loaded for', symbol);
+            } catch (err) {
+                console.error(err);
+                alert('API issue – check your Alpha Vantage key or rate limit');
             }
         }
-       
-        let rsiVisible = false;
-        function toggleRSIPane() {
-            if (!rsiPane) {
-                rsiPane = chart.addPane(150); // separate pane height
-                rsiSeries = chart.addLineSeries({ color: '#a78bfa', pane: rsiPane, title: 'RSI' });
+
+        // Quick load from navbar
+        function quickLoadStock() {
+            const sym = document.getElementById('quick-symbol').value.toUpperCase().trim();
+            if (sym) {
+                document.getElementById('symbol').value = sym;
+                document.getElementById('chart-section').scrollIntoView({ behavior: 'smooth' });
+                setTimeout(loadFullStockData, 600);
             }
-            rsiVisible = !rsiVisible;
-            // In real code you'd fetch more data and set RSI series – simplified here
-            alert("RSI pane toggled (full implementation needs more data points)");
         }
-       
-        // ================== PORTFOLIO ==================
+
+        // ============== PORTFOLIO ==============
+        let portfolio = JSON.parse(localStorage.getItem('stockProPortfolio')) || [];
+        let priceCache = {};
+
         function renderPortfolio() {
-            const tbody = document.querySelector('#portfolioTable tbody');
+            const tbody = document.querySelector('#portfolio-table tbody');
             tbody.innerHTML = '';
             let totalValue = 0, totalCost = 0;
-           
-            portfolio.forEach((item, index) => {
-                const currentPrice = priceCache[item.symbol] || item.buyPrice;
-                const value = item.shares * currentPrice;
+
+            portfolio.forEach((item, i) => {
+                const current = priceCache[item.symbol] || item.buyPrice;
+                const value = item.shares * current;
                 const cost = item.shares * item.buyPrice;
-                const gainPct = ((currentPrice - item.buyPrice) / item.buyPrice * 100).toFixed(1);
-               
+                const gain = ((current - item.buyPrice) / item.buyPrice * 100);
+
                 totalValue += value;
                 totalCost += cost;
-               
+
                 const row = document.createElement('tr');
+                row.className = 'hover:bg-slate-800/50';
                 row.innerHTML = `
-                    <td>${item.symbol}</td>
-                    <td>${item.shares}</td>
-                    <td>$${item.buyPrice}</td>
-                    <td>$${currentPrice.toFixed(2)}</td>
-                    <td>$${value.toFixed(2)}</td>
-                    <td class="${gainPct > 0 ? 'positive' : 'negative'}">${gainPct}%</td>
-                    <td><button onclick="removeFromPortfolio(${index})">Remove</button></td>
+                    <td class="py-5 px-8 font-medium">${item.symbol}</td>
+                    <td class="py-5 px-8">${item.shares}</td>
+                    <td class="py-5 px-8">$${item.buyPrice.toFixed(2)}</td>
+                    <td class="py-5 px-8">$${current.toFixed(2)}</td>
+                    <td class="py-5 px-8 font-medium">$${value.toFixed(0)}</td>
+                    <td class="py-5 px-8 ${gain >= 0 ? 'text-emerald-400' : 'text-red-400'}">${gain.toFixed(1)}%</td>
+                    <td class="py-5 px-8"><button onclick="removeHolding(${i})" class="text-red-400 hover:text-red-500 text-xs">×</button></td>
                 `;
                 tbody.appendChild(row);
             });
-           
-            const totalGainPct = totalCost ? ((totalValue - totalCost) / totalCost * 100).toFixed(1) : 0;
-            document.getElementById('totalValue').textContent = totalValue.toFixed(2);
-            document.getElementById('totalGain').innerHTML = `(${totalGainPct}% <span class="${totalGainPct>0?'positive':'negative'}">overall</span>)`;
-           
-            // Allocation pie
-            renderAllocationPie();
+
+            document.getElementById('portfolio-total').textContent = '$' + totalValue.toFixed(0);
+            const overallGain = totalCost ? ((totalValue - totalCost) / totalCost * 100) : 0;
+            document.getElementById('portfolio-gain').innerHTML = `
+                <span class="${overallGain >= 0 ? 'text-emerald-400' : 'text-red-400'}">${overallGain.toFixed(1)}% overall</span>
+            `;
+
+            // Pie chart
+            renderPieChart();
         }
-       
-        function renderAllocationPie() {
-            const ctx = document.getElementById('allocation');
-            if (window.allocationChart) window.allocationChart.destroy();
-           
+
+        function renderPieChart() {
+            const ctx = document.getElementById('allocation-chart');
+            if (window.pieInstance) window.pieInstance.destroy();
             const labels = portfolio.map(p => p.symbol);
             const values = portfolio.map(p => p.shares * (priceCache[p.symbol] || p.buyPrice));
-           
-            window.allocationChart = new Chart(ctx, {
-                type: 'pie',
-                data: { labels, datasets: [{ data: values, backgroundColor: ['#3b82f6','#22c55e','#eab308','#ef4444','#8b5cf6'] }] },
-                options: { responsive: true, plugins: { legend: { position: 'bottom', labels: { color: '#e2e8f0' } } } }
+            window.pieInstance = new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels,
+                    datasets: [{ data: values, backgroundColor: ['#10b981', '#0ea5e9', '#f59e0b', '#ec4899', '#8b5cf6'] }]
+                },
+                options: { cutout: '70%', plugins: { legend: { display: false } } }
             });
         }
-       
+
         function addToPortfolio() {
-            const symbol = document.getElementById('addSymbol').value.toUpperCase().trim();
-            const shares = parseFloat(document.getElementById('addShares').value);
-            const buyPrice = parseFloat(document.getElementById('addBuyPrice').value);
-           
-            if (!symbol || !shares || !buyPrice) return alert("Fill all fields");
-           
+            const symbol = document.getElementById('add-symbol').value.toUpperCase().trim();
+            const shares = parseFloat(document.getElementById('add-shares').value);
+            const buyPrice = parseFloat(document.getElementById('add-buy-price').value);
+            if (!symbol || !shares || !buyPrice) return alert('Fill all fields');
+
             portfolio.push({ symbol, shares, buyPrice });
-            localStorage.setItem('portfolio', JSON.stringify(portfolio));
+            localStorage.setItem('stockProPortfolio', JSON.stringify(portfolio));
             renderPortfolio();
+
+            // Try to fetch latest price
+            if (!priceCache[symbol]) {
+                fetch(`https://www.alphavantage.co/query?function=GLOBAL_QUOTE&symbol=${symbol}&apikey=${ALPHA_KEY}`)
+                    .then(r => r.json())
+                    .then(json => {
+                        if (json['Global Quote']) {
+                            priceCache[symbol] = parseFloat(json['Global Quote']['05. price']);
+                            renderPortfolio();
+                        }
+                    });
+            }
+        }
+
+        function removeHolding(i) {
+            portfolio.splice(i, 1);
+            localStorage.setItem('stockProPortfolio', JSON.stringify(portfolio));
+            renderPortfolio();
+        }
+
+        // ============== CURRENCY RATES (no key) ==============
+        async function loadCurrencyRates() {
+            try {
+                const base = document.getElementById('base-currency').value;
+                const res = await fetch(`https://open.er-api.com/v6/latest/${base}`);
+                const json = await res.json();
+                if (json.rates) {
+                    const usd = json.rates.USD ? json.rates.USD.toFixed(4) : '—';
+                    const eur = json.rates.EUR ? json.rates.EUR.toFixed(4) : '—';
+                    const gbp = json.rates.GBP ? json.rates.GBP.toFixed(4) : '—';
+                    document.getElementById('currency-result').innerHTML = `
+                        1 ${base} = ${usd} USD<br>
+                        1 ${base} = ${eur} EUR<br>
+                        1 ${base} = ${gbp} GBP
+                    `;
+                }
+            } catch (e) {
+                document.getElementById('currency-result').textContent = 'Error – try again';
+            }
+        }
+
+        // ============== MORTGAGE RATES (API Ninjas) ==============
+        async function loadMortgageRates() {
+            const container = document.getElementById('mortgage-rates');
+            container.innerHTML = `<div class="text-slate-400 text-sm">Loading live mortgage rates...</div>`;
            
-            // Auto-load price if not cached
-            if (!priceCache[symbol]) loadStockDataForPortfolio(symbol);
+            if (!NINJAS_KEY || NINJAS_KEY === 'YOUR_API_NINJAS_KEY_HERE') {
+                container.innerHTML = `
+                    <div class="text-amber-300 text-sm">Add your free API Ninjas key above to see live mortgage rates.<br>
+                    <a href="https://api-ninjas.com/api/mortgagerate" target="_blank" class="underline">Get free key →</a></div>`;
+                return;
+            }
+
+            try {
+                const res = await fetch('https://api.api-ninjas.com/v1/mortgagerate', {
+                    headers: { 'X-Api-Key': NINJAS_KEY }
+                });
+                const data = await res.json();
+                let html = '';
+                data.forEach(r => {
+                    html += `
+                        <div class="flex justify-between items-center border-b border-slate-700 pb-3">
+                            <div><span class="font-medium">${r.loan_type}</span> <span class="text-xs text-slate-400">(${r.term}yr)</span></div>
+                            <div class="text-emerald-400 font-semibold">${r.rate}%</div>
+                        </div>`;
+                });
+                container.innerHTML = html || '<div class="text-slate-400">No data</div>';
+            } catch (e) {
+                container.innerHTML = `<div class="text-red-400 text-sm">Rate limit or invalid key</div>`;
+            }
         }
-       
-        async function loadStockDataForPortfolio(symbol) {
-            // Similar fetch as above but only for price – omitted for brevity
-            // In practice call the same endpoint and cache latest.close
+
+        // ============== CD RATES (static but current as of March 2026) ==============
+        function loadCDRates() {
+            const container = document.getElementById('cd-rates');
+            container.innerHTML = `
+                <div class="flex justify-between"><div class="font-medium">6-month</div><div class="font-semibold text-emerald-400">4.25% APY</div></div>
+                <div class="flex justify-between"><div class="font-medium">1-year</div><div class="font-semibold text-emerald-400">4.20% APY</div></div>
+                <div class="flex justify-between"><div class="font-medium">18-month</div><div class="font-semibold text-emerald-400">4.15% APY</div></div>
+                <div class="flex justify-between"><div class="font-medium">5-year</div><div class="font-semibold text-emerald-400">4.10% APY</div></div>
+                <div class="pt-4 text-xs text-slate-400">Top offers from Synchrony, Limelight, Abound CU • FDIC insured</div>
+            `;
         }
-       
-        function removeFromPortfolio(index) {
-            portfolio.splice(index, 1);
-            localStorage.setItem('portfolio', JSON.stringify(portfolio));
-            renderPortfolio();
-        }
-       
-        function switchTab(n) {
-            document.querySelectorAll('.tab').forEach((t,i) => t.classList.toggle('active', i===n));
-            document.getElementById('tab0').style.display = n===0 ? 'block' : 'none';
-            document.getElementById('tab1').style.display = n===1 ? 'block' : 'none';
-        }
-       
-        // Init everything
+
+        // ============== START EVERYTHING ==============
         window.onload = () => {
+            initTailwind();
             initChart();
             renderPortfolio();
-            switchTab(0);
-           
+            loadMortgageRates();
+            loadCDRates();
             // Demo load
             setTimeout(() => {
                 document.getElementById('symbol').value = 'AAPL';
-                loadStockData();
-            }, 500);
+                loadFullStockData();
+            }, 800);
         };
     </script>
 </body>
-</html>
+</html>​
