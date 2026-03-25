@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+
+<html lang="en">
+
+<head>
+
+  <meta charset="UTF-8">
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <title>FinanceHub • Stock Charts & CD Rates</title>
+
+  <script src="https://unpkg.com/lightweight-charts@5.0.0/dist/lightweight-charts.standalone.production.js"></script>
+
+  <style>
+
+    body { font-family: 'Segoe UI', Arial, sans-serif; margin: 0; background: #0f172a; color: #e2e8f0; }
+
+    header { background: #1e2937; padding: 1rem; text-align: center; }
+
+    nav { display: flex; justify-content: center; gap: 2rem; margin: 1rem 0; }
+
+    nav a { color: #60a5fa; text-decoration: none; font-weight: bold; }
+
+    nav a:hover { color: #fff; }
+
+    .container { max-width: 1200px; margin: 2rem auto; padding: 0 1rem; }
+
+    h1 { color: #60a5fa; }
+
+    .section { margin-bottom: 3rem; }
+
+    .card { background: #1e2937; padding: 1.5rem; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.3); }
+
+    table { width: 100%; border-collapse: collapse; margin-top: 1rem; }
+
+    th, td { padding: 12px; text-align: left; border-bottom: 1px solid #334155; }
+
+    th { background: #1e40af; color: white; }
+
+    #chart { width: 100%; height: 500px; border-radius: 12px; }
+
+    footer { text-align: center; padding: 2rem; font-size: 0.9rem; color: #64748b; }
+
+  </style>
+
+</head>
+
+<body>
+
+  <header>
+
+    <h1>FinanceHub</h1>
+
+    <p>Stock Chart Analysis • CD Rates • Finance Tools</p>
+
+  </header>
+
+
+
+  <nav>
+
+    <a href="#charts">Stock Charts</a>
+
+    <a href="#cd-rates">CD Rates</a>
+
+    <a href="#">More Tools (coming)</a>
+
+  </nav>
+
+
+
+  <div class="container">
+
+    <!-- Stock Charts Section -->
+
+    <div id="charts" class="section">
+
+      <h2>Stock Chart Analysis</h2>
+
+      <div class="card">
+
+        <h3>AAPL (Apple Inc.) – Last 10 Trading Days (Example)</h3>
+
+        <div id="chart"></div>
+
+      </div>
+
+      <p style="font-size:0.9rem; margin-top:1rem; color:#64748b;">
+
+        Disclaimer: This is demo data for illustration. In the next step we can add real-time data.
+
+      </p>
+
+    </div>
+
+
+
+    <!-- CD Rates Section -->
+
+    <div id="cd-rates" class="section">
+
+      <h2>Current Best CD Rates (March 2026)</h2>
+
+      <div class="card">
+
+        <table>
+
+          <thead>
+
+            <tr>
+
+              <th>Bank / Institution</th>
+
+              <th>Term</th>
+
+              <th>APY</th>
+
+              <th>Minimum Deposit</th>
+
+            </tr>
+
+          </thead>
+
+          <tbody>
+
+            <tr><td>Mountain America Credit Union</td><td>1 Year</td><td>4.20%</td><td>$500</td></tr>
+
+            <tr><td>Limelight Bank</td><td>6 Months – 5 Years</td><td>Up to 4.15%</td><td>$1,000</td></tr>
+
+            <tr><td>E*TRADE</td><td>6 Months – 5 Years</td><td>Up to 4.10%</td><td>None</td></tr>
+
+            <tr><td>Synchrony Bank</td><td>3 Months – 5 Years</td><td>Up to 4.10%</td><td>None</td></tr>
+
+            <tr><td>Bread Savings</td><td>9 Months</td><td>4.15%</td><td>$100</td></tr>
+
+          </tbody>
+
+        </table>
+
+        <p style="font-size:0.85rem; margin-top:1rem; color:#64748b;">
+
+          Rates as of March 25, 2026. Rates change daily — always verify on the bank's site.
+
+        </p>
+
+      </div>
+
+    </div>
+
+  </div>
+
+
+
+  <footer>
+
+    Built with ❤️ on GitHub Pages • Not financial advice • Data for educational purposes only
+
+  </footer>
+
+
+
+  <script>
+
+    // Create the stock chart
+
+    const chart = LightweightCharts.createChart(document.getElementById('chart'), {
+
+      width: 1100,
+
+      height: 500,
+
+      layout: { backgroundColor: '#1e2937', textColor: '#e2e8f0' },
+
+      grid: { vertLines: { color: '#334155' }, horzLines: { color: '#334155' } },
+
+    });
+
+    const candlestickSeries = chart.addCandlestickSeries();
+
+    candlestickSeries.setData([
+
+      { time: '2026-03-10', open: 225, high: 228, low: 223, close: 227 },
+
+      { time: '2026-03-11', open: 227, high: 230, low: 226, close: 229 },
+
+      { time: '2026-03-12', open: 229, high: 231, low: 228, close: 230 },
+
+      { time: '2026-03-13', open: 230, high: 233, low: 229, close: 232 },
+
+      { time: '2026-03-14', open: 232, high: 234, low: 231, close: 233 },
+
+      { time: '2026-03-17', open: 233, high: 235, low: 232, close: 234 },
+
+      { time: '2026-03-18', open: 234, high: 236, low: 233, close: 235 },
+
+      { time: '2026-03-19', open: 235, high: 237, low: 234, close: 236 },
+
+      { time: '2026-03-20', open: 236, high: 238, low: 235, close: 237 },
+
+      { time: '2026-03-21', open: 237, high: 239, low: 236, close: 238 }
+
+    ]);
+
+    chart.timeScale().fitContent();
+
+  </script>
+
+</body>
+
+</html>
