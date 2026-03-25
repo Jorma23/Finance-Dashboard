@@ -1,211 +1,305 @@
 <!DOCTYPE html>
-
 <html lang="en">
-
 <head>
-
-  <meta charset="UTF-8">
-
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-  <title>FinanceHub • Stock Charts & CD Rates</title>
-
-  <script src="https://unpkg.com/lightweight-charts@5.0.0/dist/lightweight-charts.standalone.production.js"></script>
-
-  <style>
-
-    body { font-family: 'Segoe UI', Arial, sans-serif; margin: 0; background: #0f172a; color: #e2e8f0; }
-
-    header { background: #1e2937; padding: 1rem; text-align: center; }
-
-    nav { display: flex; justify-content: center; gap: 2rem; margin: 1rem 0; }
-
-    nav a { color: #60a5fa; text-decoration: none; font-weight: bold; }
-
-    nav a:hover { color: #fff; }
-
-    .container { max-width: 1200px; margin: 2rem auto; padding: 0 1rem; }
-
-    h1 { color: #60a5fa; }
-
-    .section { margin-bottom: 3rem; }
-
-    .card { background: #1e2937; padding: 1.5rem; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.3); }
-
-    table { width: 100%; border-collapse: collapse; margin-top: 1rem; }
-
-    th, td { padding: 12px; text-align: left; border-bottom: 1px solid #334155; }
-
-    th { background: #1e40af; color: white; }
-
-    #chart { width: 100%; height: 500px; border-radius: 12px; }
-
-    footer { text-align: center; padding: 2rem; font-size: 0.9rem; color: #64748b; }
-
-  </style>
-
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Stock Pro - Charts & Portfolio</title>
+    <script src="https://unpkg.com/lightweight-charts/dist/lightweight-charts.standalone.production.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+    <style>
+        body { font-family: system-ui, sans-serif; margin:0; padding:20px; background:#0f172a; color:#e2e8f0; }
+        h1 { text-align:center; margin-bottom:10px; }
+        .tabs { display:flex; justify-content:center; margin-bottom:20px; }
+        .tab { padding:10px 25px; background:#1e2937; border:none; color:#e2e8f0; cursor:pointer; border-radius:6px 6px 0 0; }
+        .tab.active { background:#3b82f6; }
+        #container { max-width:1200px; margin:auto; }
+        #chart { height:520px; background:#1e2937; border-radius:8px; }
+        .portfolio { background:#1e2937; padding:20px; border-radius:8px; }
+        table { width:100%; border-collapse:collapse; margin-top:10px; }
+        th, td { padding:10px; text-align:left; border-bottom:1px solid #334155; }
+        .positive { color:#22c55e; } .negative { color:#ef4444; }
+        .controls { text-align:center; margin:15px 0; }
+        button, input { padding:8px 12px; margin:5px; border-radius:6px; }
+        button { background:#3b82f6; color:white; border:none; cursor:pointer; }
+        #allocation { height:300px; }
+    </style>
 </head>
-
 <body>
+    <div id="container">
+        <h1>📈 Stock Pro - Full Technical Analysis & Portfolio</h1>
+       
+        <div class="tabs">
+            <button class="tab active" onclick="switchTab(0)">Main Chart + TA</button>
+            <button class="tab" onclick="switchTab(1)">Portfolio Tracker</button>
+        </div>
 
-  <header>
+        <!-- Tab 1: Chart + Technical Analysis -->
+        <div id="tab0">
+            <div class="controls">
+                <input id="symbol" type="text" value="AAPL" placeholder="Ticker">
+                <button onclick="loadStockData()">Load Stock + Indicators</button>
+                <button onclick="toggleRSIPane()">Toggle RSI Pane</button>
+            </div>
+            <div id="chart"></div>
+            <div class="info" style="display:flex; justify-content:space-around; background:#1e2937; padding:15px; border-radius:8px; margin-top:15px;">
+                <div><strong>Price:</strong> <span id="price">--</span></div>
+                <div><strong>RSI:</strong> <span id="rsiVal">--</span></div>
+                <div><strong>MACD:</strong> <span id="macdVal">--</span></div>
+            </div>
+        </div>
 
-    <h1>FinanceHub</h1>
-
-    <p>Stock Chart Analysis • CD Rates • Finance Tools</p>
-
-  </header>
-
-
-
-  <nav>
-
-    <a href="#charts">Stock Charts</a>
-
-    <a href="#cd-rates">CD Rates</a>
-
-    <a href="#">More Tools (coming)</a>
-
-  </nav>
-
-
-
-  <div class="container">
-
-    <!-- Stock Charts Section -->
-
-    <div id="charts" class="section">
-
-      <h2>Stock Chart Analysis</h2>
-
-      <div class="card">
-
-        <h3>AAPL (Apple Inc.) – Last 10 Trading Days (Example)</h3>
-
-        <div id="chart"></div>
-
-      </div>
-
-      <p style="font-size:0.9rem; margin-top:1rem; color:#64748b;">
-
-        Disclaimer: This is demo data for illustration. In the next step we can add real-time data.
-
-      </p>
-
+        <!-- Tab 2: Portfolio -->
+        <div id="tab1" style="display:none;">
+            <div class="portfolio">
+                <h2>Your Portfolio</h2>
+                <input id="addSymbol" placeholder="Ticker" style="width:100px;">
+                <input id="addShares" type="number" placeholder="Shares" style="width:80px;">
+                <input id="addBuyPrice" type="number" placeholder="Buy Price" style="width:100px;">
+                <button onclick="addToPortfolio()">Add Holding</button>
+               
+                <table id="portfolioTable">
+                    <thead><tr><th>Symbol</th><th>Shares</th><th>Buy Price</th><th>Current</th><th>Value</th><th>Gain/Loss %</th><th>Actions</th></tr></thead>
+                    <tbody></tbody>
+                </table>
+               
+                <div style="margin-top:20px;">
+                    <strong>Total Value: $<span id="totalValue">0.00</span></strong>
+                    <span id="totalGain" class="positive"></span>
+                </div>
+                <canvas id="allocation" width="300" height="300"></canvas>
+            </div>
+        </div>
     </div>
 
-
-
-    <!-- CD Rates Section -->
-
-    <div id="cd-rates" class="section">
-
-      <h2>Current Best CD Rates (March 2026)</h2>
-
-      <div class="card">
-
-        <table>
-
-          <thead>
-
-            <tr>
-
-              <th>Bank / Institution</th>
-
-              <th>Term</th>
-
-              <th>APY</th>
-
-              <th>Minimum Deposit</th>
-
-            </tr>
-
-          </thead>
-
-          <tbody>
-
-            <tr><td>Mountain America Credit Union</td><td>1 Year</td><td>4.20%</td><td>$500</td></tr>
-
-            <tr><td>Limelight Bank</td><td>6 Months – 5 Years</td><td>Up to 4.15%</td><td>$1,000</td></tr>
-
-            <tr><td>E*TRADE</td><td>6 Months – 5 Years</td><td>Up to 4.10%</td><td>None</td></tr>
-
-            <tr><td>Synchrony Bank</td><td>3 Months – 5 Years</td><td>Up to 4.10%</td><td>None</td></tr>
-
-            <tr><td>Bread Savings</td><td>9 Months</td><td>4.15%</td><td>$100</td></tr>
-
-          </tbody>
-
-        </table>
-
-        <p style="font-size:0.85rem; margin-top:1rem; color:#64748b;">
-
-          Rates as of March 25, 2026. Rates change daily — always verify on the bank's site.
-
-        </p>
-
-      </div>
-
-    </div>
-
-  </div>
-
-
-
-  <footer>
-
-    Built with ❤️ on GitHub Pages • Not financial advice • Data for educational purposes only
-
-  </footer>
-
-
-
-  <script>
-
-    // Create the stock chart
-
-    const chart = LightweightCharts.createChart(document.getElementById('chart'), {
-
-      width: 1100,
-
-      height: 500,
-
-      layout: { backgroundColor: '#1e2937', textColor: '#e2e8f0' },
-
-      grid: { vertLines: { color: '#334155' }, horzLines: { color: '#334155' } },
-
-    });
-
-    const candlestickSeries = chart.addCandlestickSeries();
-
-    candlestickSeries.setData([
-
-      { time: '2026-03-10', open: 225, high: 228, low: 223, close: 227 },
-
-      { time: '2026-03-11', open: 227, high: 230, low: 226, close: 229 },
-
-      { time: '2026-03-12', open: 229, high: 231, low: 228, close: 230 },
-
-      { time: '2026-03-13', open: 230, high: 233, low: 229, close: 232 },
-
-      { time: '2026-03-14', open: 232, high: 234, low: 231, close: 233 },
-
-      { time: '2026-03-17', open: 233, high: 235, low: 232, close: 234 },
-
-      { time: '2026-03-18', open: 234, high: 236, low: 233, close: 235 },
-
-      { time: '2026-03-19', open: 235, high: 237, low: 234, close: 236 },
-
-      { time: '2026-03-20', open: 236, high: 238, low: 235, close: 237 },
-
-      { time: '2026-03-21', open: 237, high: 239, low: 236, close: 238 }
-
-    ]);
-
-    chart.timeScale().fitContent();
-
-  </script>
-
+    <script>
+        // ================== CONFIG ==================
+        const API_KEY = 'YOUR_ALPHA_VANTAGE_KEY_HERE'; // ← Replace with your free key
+       
+        let chart, candleSeries, rsiPane, rsiSeries, macdSeries, macdHistSeries, bbUpper, bbLower, sma50, sma200;
+        let portfolio = JSON.parse(localStorage.getItem('portfolio')) || [];
+        let priceCache = {}; // symbol -> current price
+       
+        // Simple technical calculations
+        function calculateSMA(data, period) {
+            const result = [];
+            for (let i = period - 1; i < data.length; i++) {
+                const sum = data.slice(i - period + 1, i + 1).reduce((a, d) => a + d.close, 0);
+                result.push({ time: data[i].time, value: sum / period });
+            }
+            return result;
+        }
+       
+        function calculateBollinger(data, period = 20, stdDev = 2) {
+            const sma = calculateSMA(data, period);
+            const upper = [], lower = [];
+            for (let i = 0; i < sma.length; i++) {
+                const slice = data.slice(i + period - 1 - (period-1), i + period).map(d => d.close); // approx
+                const mean = sma[i].value;
+                const variance = slice.reduce((a, v) => a + Math.pow(v - mean, 2), 0) / period;
+                const dev = Math.sqrt(variance);
+                upper.push({ time: sma[i].time, value: mean + stdDev * dev });
+                lower.push({ time: sma[i].time, value: mean - stdDev * dev });
+            }
+            return { upper, lower };
+        }
+       
+        function calculateRSI(data, period = 14) {
+            let gains = 0, losses = 0;
+            for (let i = 1; i < data.length; i++) {
+                const change = data[i].close - data[i-1].close;
+                if (change > 0) gains += change; else losses -= change;
+            }
+            const avgGain = gains / period;
+            const avgLoss = losses / period || 0.0001;
+            return (100 - (100 / (1 + avgGain / avgLoss))).toFixed(1);
+        }
+       
+        function calculateMACD(data, fast=12, slow=26, signal=9) {
+            // Very simplified – for production use a proper lib
+            const emaFast = calculateSMA(data, fast); // approx EMA with SMA for demo
+            const emaSlow = calculateSMA(data, slow);
+            const macdLine = [];
+            for (let i = Math.max(emaFast.length, emaSlow.length) - 1; i >= 0; i--) {
+                const idx = i;
+                if (emaFast[idx] && emaSlow[idx]) {
+                    macdLine.push({ time: emaFast[idx].time, value: emaFast[idx].value - emaSlow[idx].value });
+                }
+            }
+            return macdLine; // histogram & signal omitted for brevity
+        }
+       
+        // ================== CHART SETUP ==================
+        function initChart() {
+            const container = document.getElementById('chart');
+            chart = LightweightCharts.createChart(container, {
+                width: container.clientWidth,
+                height: 520,
+                layout: { background: { color: '#1e2937' }, textColor: '#e2e8f0' },
+                grid: { vertLines: { color: '#334155' }, horzLines: { color: '#334155' } },
+                crosshair: { mode: LightweightCharts.CrosshairMode.Magnet }
+            });
+           
+            candleSeries = chart.addCandlestickSeries();
+           
+            // Main overlays
+            sma50 = chart.addLineSeries({ color: '#22c55e', lineWidth: 2, title: 'SMA 50' });
+            sma200 = chart.addLineSeries({ color: '#eab308', lineWidth: 2, title: 'SMA 200' });
+            bbUpper = chart.addLineSeries({ color: '#64748b', lineWidth: 1, title: 'BB Upper' });
+            bbLower = chart.addLineSeries({ color: '#64748b', lineWidth: 1, title: 'BB Lower' });
+           
+            window.addEventListener('resize', () => chart.applyOptions({ width: container.clientWidth }));
+        }
+       
+        async function loadStockData() {
+            const symbol = document.getElementById('symbol').value.toUpperCase().trim();
+            if (!symbol) return alert("Enter a ticker");
+           
+            try {
+                const res = await fetch(`https://www.alphavantage.co/query?function=TIME_SERIES_DAILY_ADJUSTED&symbol=${symbol}&outputsize=compact&apikey=${API_KEY}`);
+                const json = await res.json();
+                const ts = json['Time Series (Daily)'];
+               
+                if (!ts) throw new Error("No data");
+               
+                const data = Object.keys(ts).map(date => ({
+                    time: date,
+                    open: parseFloat(ts[date]['1. open']),
+                    high: parseFloat(ts[date]['2. high']),
+                    low: parseFloat(ts[date]['3. low']),
+                    close: parseFloat(ts[date]['4. close'])
+                })).reverse();
+               
+                candleSeries.setData(data);
+                chart.timeScale().fitContent();
+               
+                // Indicators
+                sma50.setData(calculateSMA(data, 50));
+                sma200.setData(calculateSMA(data, 200));
+               
+                const bb = calculateBollinger(data);
+                bbUpper.setData(bb.upper);
+                bbLower.setData(bb.lower);
+               
+                // Update info
+                const latest = data[data.length-1];
+                document.getElementById('price').textContent = latest.close.toFixed(2);
+                document.getElementById('rsiVal').textContent = calculateRSI(data);
+                document.getElementById('macdVal').textContent = "Demo MACD";
+               
+                priceCache[symbol] = latest.close;
+                renderPortfolio(); // refresh portfolio if this stock is held
+               
+            } catch (e) {
+                alert("API error – check your key or rate limit (5 calls/min free tier)");
+                console.error(e);
+            }
+        }
+       
+        let rsiVisible = false;
+        function toggleRSIPane() {
+            if (!rsiPane) {
+                rsiPane = chart.addPane(150); // separate pane height
+                rsiSeries = chart.addLineSeries({ color: '#a78bfa', pane: rsiPane, title: 'RSI' });
+            }
+            rsiVisible = !rsiVisible;
+            // In real code you'd fetch more data and set RSI series – simplified here
+            alert("RSI pane toggled (full implementation needs more data points)");
+        }
+       
+        // ================== PORTFOLIO ==================
+        function renderPortfolio() {
+            const tbody = document.querySelector('#portfolioTable tbody');
+            tbody.innerHTML = '';
+            let totalValue = 0, totalCost = 0;
+           
+            portfolio.forEach((item, index) => {
+                const currentPrice = priceCache[item.symbol] || item.buyPrice;
+                const value = item.shares * currentPrice;
+                const cost = item.shares * item.buyPrice;
+                const gainPct = ((currentPrice - item.buyPrice) / item.buyPrice * 100).toFixed(1);
+               
+                totalValue += value;
+                totalCost += cost;
+               
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${item.symbol}</td>
+                    <td>${item.shares}</td>
+                    <td>$${item.buyPrice}</td>
+                    <td>$${currentPrice.toFixed(2)}</td>
+                    <td>$${value.toFixed(2)}</td>
+                    <td class="${gainPct > 0 ? 'positive' : 'negative'}">${gainPct}%</td>
+                    <td><button onclick="removeFromPortfolio(${index})">Remove</button></td>
+                `;
+                tbody.appendChild(row);
+            });
+           
+            const totalGainPct = totalCost ? ((totalValue - totalCost) / totalCost * 100).toFixed(1) : 0;
+            document.getElementById('totalValue').textContent = totalValue.toFixed(2);
+            document.getElementById('totalGain').innerHTML = `(${totalGainPct}% <span class="${totalGainPct>0?'positive':'negative'}">overall</span>)`;
+           
+            // Allocation pie
+            renderAllocationPie();
+        }
+       
+        function renderAllocationPie() {
+            const ctx = document.getElementById('allocation');
+            if (window.allocationChart) window.allocationChart.destroy();
+           
+            const labels = portfolio.map(p => p.symbol);
+            const values = portfolio.map(p => p.shares * (priceCache[p.symbol] || p.buyPrice));
+           
+            window.allocationChart = new Chart(ctx, {
+                type: 'pie',
+                data: { labels, datasets: [{ data: values, backgroundColor: ['#3b82f6','#22c55e','#eab308','#ef4444','#8b5cf6'] }] },
+                options: { responsive: true, plugins: { legend: { position: 'bottom', labels: { color: '#e2e8f0' } } } }
+            });
+        }
+       
+        function addToPortfolio() {
+            const symbol = document.getElementById('addSymbol').value.toUpperCase().trim();
+            const shares = parseFloat(document.getElementById('addShares').value);
+            const buyPrice = parseFloat(document.getElementById('addBuyPrice').value);
+           
+            if (!symbol || !shares || !buyPrice) return alert("Fill all fields");
+           
+            portfolio.push({ symbol, shares, buyPrice });
+            localStorage.setItem('portfolio', JSON.stringify(portfolio));
+            renderPortfolio();
+           
+            // Auto-load price if not cached
+            if (!priceCache[symbol]) loadStockDataForPortfolio(symbol);
+        }
+       
+        async function loadStockDataForPortfolio(symbol) {
+            // Similar fetch as above but only for price – omitted for brevity
+            // In practice call the same endpoint and cache latest.close
+        }
+       
+        function removeFromPortfolio(index) {
+            portfolio.splice(index, 1);
+            localStorage.setItem('portfolio', JSON.stringify(portfolio));
+            renderPortfolio();
+        }
+       
+        function switchTab(n) {
+            document.querySelectorAll('.tab').forEach((t,i) => t.classList.toggle('active', i===n));
+            document.getElementById('tab0').style.display = n===0 ? 'block' : 'none';
+            document.getElementById('tab1').style.display = n===1 ? 'block' : 'none';
+        }
+       
+        // Init everything
+        window.onload = () => {
+            initChart();
+            renderPortfolio();
+            switchTab(0);
+           
+            // Demo load
+            setTimeout(() => {
+                document.getElementById('symbol').value = 'AAPL';
+                loadStockData();
+            }, 500);
+        };
+    </script>
 </body>
-
 </html>
